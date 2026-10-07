@@ -27,9 +27,10 @@ class Salon(Entrega):
         self.num_mesa = num_mesa
 
 class Delivery(Entrega):
-    def __init__(self, direccion, costo_envio = 5.00):
+    def __init__(self, direccion, celular, costo_envio = 5.00):
         super().__init__("Delivery")
         self.direccion = direccion
+        self.celular = celular
         self.costo_envio = costo_envio
 
 #Clases de pedido y pago
@@ -131,7 +132,7 @@ class Sistema_Caja:
             elif opcion == "2":
                 direccion = input("Ingrese la dirección: ").strip()
                 num_celular = input("Ingrese el número de celular: ").strip()
-                entrega_actual = Delivery(direccion)
+                entrega_actual = Delivery(direccion, num_celular)
                 self.monto_total += entrega_actual.costo_envio
                 print("+ Se agregaron S/ 5.00 por el costo del delivery")
                 break
@@ -183,18 +184,19 @@ class Sistema_Caja:
         while True:
             try:
                 monto_cobrado = float(input("Ingrese el monto cobrado al cliente: S/."))
-                break
-            except ValueError:
-                print("Ingrese un monto válido")
                 
-        if monto_cobrado>=self.monto_total:
-            vuelto = monto_cobrado - self.monto_total
-            print(f"El vuelto a entregar es: S/.{vuelto:.2f}")
+                if monto_cobrado>=self.monto_total:
+                    vuelto = monto_cobrado - self.monto_total
+                    print(f"El vuelto a entregar es de: S/.{vuelto:.2f}")
 
-            pago_actual = Metodo_Pago(monto_cobrado, "Completado")
-        else:
-            print("Pedido cancelado")
-            return    
+                    pago_actual = Metodo_Pago(monto_cobrado, "Completado")
+                    self.id_pedido += 1     #Aumentamos el ID si se llegó a cobrar con éxito
+                    break
+                
+                else:
+                    print("El monto ingresado es menor al total a pagar. Intente de nuevo.")
+            except ValueError:
+                print("Ingrese un monto válido")  
 
 #-------------------------------------------------------------------------------
 
