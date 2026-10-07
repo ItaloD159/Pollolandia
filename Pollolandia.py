@@ -125,11 +125,12 @@ class Sistema_Caja:
             #Si es en salón
             if opcion == "1":
                 num_mesa = input("Ingrese el número de mesa: ").strip()
-                entrega_actual = Salon(num_mesa)
+                entrega_actual = Salon(num_mesa) #Creamos el objeto salon y lo igualamos a la variable
                 break
             #Si es delivery
             elif opcion == "2":
                 direccion = input("Ingrese la dirección: ").strip()
+                num_celular = input("Ingrese el número de celular: ").strip()
                 entrega_actual = Delivery(direccion)
                 self.monto_total += entrega_actual.costo_envio
                 print("+ Se agregaron S/ 5.00 por el costo del delivery")
