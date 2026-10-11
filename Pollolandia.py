@@ -1,3 +1,4 @@
+from datetime import datetime
 #Clases de persona
 class Persona:
     def __init__(self, nombre, dni=""):
@@ -58,6 +59,21 @@ class almacen:
         self.papas = 100.00
         self.ensaladas = 100.00
         self.arroz_chaufa = 20.00
+
+    def verificar_stock(self, cant_pollos, cant_papas, cant_ensaladas,cant_arroz_chaufa, cant_gaseosas):
+        if self.pollos < cant_pollos:
+            return False
+        if self.papas < cant_papas:
+            return False
+        if self.ensaladas < cant_ensaladas:
+            return False
+        if self.arroz_chaufa < cant_arroz_chaufa:
+            return False
+        for gaseosa, cantidad in cant_gaseosas.items():
+            if self.gaseosas.get(gaseosa, 0) < cantidad:
+                return False
+        return True
+
 
     def descontar_stock(self, cant_pollos, cant_papas, cant_ensaladas,cant_arroz_chaufa, cant_gaseosas):
         self.pollos -= cant_pollos
@@ -133,54 +149,143 @@ class Sistema_Caja:
             precio = 0
 
             if opcion == "1":
-                precio = 18.00
-                self.cant_pollos_actual += 0.25
-                self.cant_papas_actual += 0.25
-                self.cant_ensaladas_actual += 0.25
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual + 0.25,
+                    self.cant_papas_actual + 0.25,
+                    self.cant_ensaladas_actual + 0.25,
+                    self.cant_arroz_chaufa_actual,
+                    self.cant_gaseosas_actual
+                ):
+                    precio = 18.00
+                    self.cant_pollos_actual += 0.25
+                    self.cant_papas_actual += 0.25
+                    self.cant_ensaladas_actual += 0.25
+                else:
+                    print("No hay suficiente stock.")
+
             elif opcion == "2":
-                precio = 20.00
-                self.cant_pollos_actual += 0.25
-                self.cant_papas_actual += 0.25
-                self.cant_ensaladas_actual += 0.25
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual + 0.25,
+                    self.cant_papas_actual + 0.25,
+                    self.cant_ensaladas_actual + 0.25,
+                    self.cant_arroz_chaufa_actual,
+                    self.cant_gaseosas_actual
+                ):
+                    precio = 20.00
+                    self.cant_pollos_actual += 0.25
+                    self.cant_papas_actual += 0.25
+                    self.cant_ensaladas_actual += 0.25
+                else:
+                    print("No hay suficiente stock.")
+
             elif opcion == "3":
-                precio = 35.00
-                self.cant_pollos_actual += 0.50
-                self.cant_papas_actual += 0.50
-                self.cant_ensaladas_actual += 0.50
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual + 0.50,
+                    self.cant_papas_actual + 0.50,
+                    self.cant_ensaladas_actual + 0.50,
+                    self.cant_arroz_chaufa_actual,
+                    self.cant_gaseosas_actual
+                ):
+                    precio = 35.00
+                    self.cant_pollos_actual += 0.50
+                    self.cant_papas_actual += 0.50
+                    self.cant_ensaladas_actual += 0.50
+                else:
+                    print("No hay suficiente stock.")
+
             elif opcion == "4":
-                precio = 65.00
-                self.cant_pollos_actual += 1.00
-                self.cant_papas_actual += 1.00
-                self.cant_ensaladas_actual += 1.00
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual + 1.00,
+                    self.cant_papas_actual + 1.00,
+                    self.cant_ensaladas_actual + 1.00,
+                    self.cant_arroz_chaufa_actual,
+                    self.cant_gaseosas_actual
+                ):
+                    precio = 65.00
+                    self.cant_pollos_actual += 1.00
+                    self.cant_papas_actual += 1.00
+                    self.cant_ensaladas_actual += 1.00
+                else:
+                    print("No hay suficiente stock.")
+
             elif opcion == "5":
-                precio = 75.00
-                self.cant_pollos_actual += 1.00
-                self.cant_papas_actual += 1.00
-                self.cant_arroz_chaufa_actual += 1.00
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual + 1.00,
+                    self.cant_papas_actual + 1.00,
+                    self.cant_ensaladas_actual,
+                    self.cant_arroz_chaufa_actual + 1.00,
+                    self.cant_gaseosas_actual
+                ):
+                    precio = 75.00
+                    self.cant_pollos_actual += 1.00
+                    self.cant_papas_actual += 1.00
+                    self.cant_arroz_chaufa_actual += 1.00
+                else:
+                    print("No hay suficiente stock.")
+                    
             elif opcion == "6":
-                precio = 4.50
-                nombre_gaseosa = "inka_500ml"
-                self.cant_gaseosas_actual[nombre_gaseosa] = (
-                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
-                )
+                gaseosas_pedido = self.cant_gaseosas_actual.copy()
+                gaseosas_pedido["inka_500ml"] = gaseosas_pedido.get("inka_500ml", 0) + 1
+
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual,
+                    self.cant_papas_actual,
+                    self.cant_ensaladas_actual,
+                    self.cant_arroz_chaufa_actual,
+                    gaseosas_pedido
+                ):
+                    precio = 4.50
+                    self.cant_gaseosas_actual = gaseosas_pedido
+                else:
+                    print("No hay suficiente stock (Inka Cola 500ml).")
+
             elif opcion == "7":
-                precio = 4.50
-                nombre_gaseosa = "coca_500ml"
-                self.cant_gaseosas_actual[nombre_gaseosa] = (
-                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
-                )
+                gaseosas_pedido = self.cant_gaseosas_actual.copy()
+                gaseosas_pedido["coca_500ml"] = gaseosas_pedido.get("coca_500ml", 0) + 1
+
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual,
+                    self.cant_papas_actual,
+                    self.cant_ensaladas_actual,
+                    self.cant_arroz_chaufa_actual,
+                    gaseosas_pedido
+                ):
+                    precio = 4.50
+                    self.cant_gaseosas_actual = gaseosas_pedido
+                else:
+                    print("No hay suficiente stock (Coca Cola 500ml).")
             elif opcion == "8":
-                precio = 13.00
-                nombre_gaseosa = "inka_2lts"
-                self.cant_gaseosas_actual[nombre_gaseosa] = (
-                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
-                )
+                gaseosas_pedido = self.cant_gaseosas_actual.copy()
+                gaseosas_pedido["inka_2lts"] = gaseosas_pedido.get("inka_2lts", 0) + 1
+
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual,
+                    self.cant_papas_actual,
+                    self.cant_ensaladas_actual,
+                    self.cant_arroz_chaufa_actual,
+                    gaseosas_pedido
+                ):
+                    precio = 13.00
+                    self.cant_gaseosas_actual = gaseosas_pedido
+                else:
+                    print("No hay suficiente stock (Inka Cola 2L).")
+
             elif opcion == "9":
-                precio = 13.00
-                nombre_gaseosa = "coca_2lts"
-                self.cant_gaseosas_actual[nombre_gaseosa] = (
-                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
-                )
+                gaseosas_pedido = self.cant_gaseosas_actual.copy()
+                gaseosas_pedido["coca_2lts"] = gaseosas_pedido.get("coca_2lts", 0) + 1
+
+                if self.almacen.verificar_stock(
+                    self.cant_pollos_actual,
+                    self.cant_papas_actual,
+                    self.cant_ensaladas_actual,
+                    self.cant_arroz_chaufa_actual,
+                    gaseosas_pedido
+                ):
+                    precio = 13.00
+                    self.cant_gaseosas_actual = gaseosas_pedido
+                else:
+                    print("No hay suficiente stock (Coca Cola 2L).")
+                
             elif opcion == "10":
                 if self.monto_total == 0:
                     print("No seleccionaste ninguna opción. Vuelve a intentarlo")
@@ -277,7 +382,7 @@ class Sistema_Caja:
                     #Creamos la impresión del comprobante
                     print("\n-----------COMPROBANTE DE PAGO------------")
                     print(f"Pedido N°{pedido_actual.id_pedido}")
-                    print("Fecha de emisión: 11/09/2026")
+                    print("Fecha de emisión:", datetime.now().strftime("%d/%m/%Y"))
                     print(f"Cliente: {cliente_actual.nombre}")
                     print(f"Tipo de entrega: {pedido_actual.entrega.tipo}")
 
@@ -288,8 +393,8 @@ class Sistema_Caja:
                         print(f" Dirección    : {pedido_actual.entrega.direccion}")
                         print(f" Celular      : {pedido_actual.entrega.celular}")
 
-                        print("-" * 42)
-                        print(f" Cliente      : {cliente_actual.nombre}")
+                    print("-" * 42)
+                    print(f" Cliente      : {cliente_actual.nombre}")
                     if cliente_actual.dni:
                         print(f" DNI          : {cliente_actual.dni}")
                     elif cliente_actual.ruc:
