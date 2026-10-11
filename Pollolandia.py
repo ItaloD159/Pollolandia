@@ -45,6 +45,31 @@ class Metodo_Pago:
         self.monto = monto
         self.estado = estado
 
+#Clase almacén
+class almacen:
+    def __init__(self):
+        self.gaseosas = {
+        "inka_500ml": 20,
+        "coca_500ml": 20,
+        "inka_2lts": 15,
+        "coca_2lts": 15,
+        }
+        self.pollos = 100.00
+        self.papas = 100.00
+        self.ensaladas = 100.00
+        self.arroz_chaufa = 20.00
+
+    def descontar_stock(self, cant_pollos, cant_papas, cant_ensaladas,cant_arroz_chaufa, cant_gaseosas):
+        self.pollos -= cant_pollos
+        self.papas -= cant_papas
+        self.ensaladas -= cant_ensaladas
+        self.arroz_chaufa -= cant_arroz_chaufa
+
+        #Creamos una lista de gaseosas para poder descontarlas del stock
+        for gaseosa, cantidad in cant_gaseosas.items():
+            if gaseosa in self.gaseosas:
+                self.gaseosas[gaseosa] -= cantidad
+
 #-------------------------------------------------------------------------------
 #Creamos el inicio de sesión del cajero
 class Sistema_Caja:
@@ -53,9 +78,16 @@ class Sistema_Caja:
         self.cajero = Empleado("Bonifacio", "1234")
         #Generamos ID de pedidos
         self.id_pedido = 1
+        self.almacen = almacen()
+        #Agregamos variables temporales actuales para llevar un control de lo que se va vendiendo
+        self.cant_pollos_actual = 0
+        self.cant_papas_actual = 0
+        self.cant_ensaladas_actual = 0
+        self.cant_arroz_chaufa_actual = 0
+        self.cant_gaseosas_actual = {}
 
     def iniciar_sesion(self):
-        print("----------SISTEMA DE CAJA POLLOLANDIA----------")
+        print("------------SISTEMA DE CAJA POLLOLANDIA------------")
 
         while True:
             codigo_ingresado = input("\nIngrese su código de cajero: ").strip()
@@ -70,40 +102,92 @@ class Sistema_Caja:
 
     def menu(self):
         self.monto_total = 0.0
+        #Si tomamos otro pedido, reiniciamos las variables actuales
+        self.cant_pollos_actual = 0
+        self.cant_papas_actual = 0
+        self.cant_ensaladas_actual = 0
+        self.cant_arroz_chaufa_actual = 0
+        self.cant_gaseosas_actual = {}
 
         while True:
-            print("\n----------MENÚ----------")
+            print("\n-----------------------STOCK-----------------------")
+            print(
+                f"\nPollos: {self.almacen.pollos:.2f}, Papas: {self.almacen.papas:.2f}, \nEnsaladas: {self.almacen.ensaladas:.2f}, Arroz Chaufa: {self.almacen.arroz_chaufa:.2f} \nGaseosas: \nInka Cola 500ml: {self.almacen.gaseosas.get('inka_500ml', 0)}, Coca Cola 500ml: {self.almacen.gaseosas.get('coca_500ml', 0)}, \nInka Cola 2lts: {self.almacen.gaseosas.get('inka_2lts', 0)}, Coca Cola 2lts: {self.almacen.gaseosas.get('coca_2lts', 0)}"
+            )
+            print("\n-----------------------MENÚ-----------------------")
             print("1. 1/4 pollo (pierna) + papas + ensalada - S/18.00")
             print("2. 1/4 pollo (pecho) + papas + ensalada -- S/20.00")
             print("3. 1/2 pollo + papas + ensalada ---------- S/35.00")
             print("4. 1 pollo entero + papas + ensalada ----- S/65.00")
-            print("5. 1 pollo entero + papas + arroz chauda - S/75.00")
-            print("6. Gaseosa Inka Cola o Coca Cola 500mlts - S/4.00")
-            print("7. Gaseosa Inka Cola o Coca Cola 2lts ---- S/8.00")
-            print("8. Gaseosa Inka Cola o Coca Cola 3lts ---- S/13.00")
-            print("9. Finalizar pedido")
-            print("10. Salir")
+            print("5. 1 pollo entero + papas + arroz chaufa - S/75.00")
+            print("6. Gaseosa Inka Cola 500ml --------------- S/4.50")
+            print("7. Gaseosa Coca Cola 500ml --------------- S/4.50")
+            print("8. Gaseosa Inka Cola 2lts ---------------- S/13.00")
+            print("9. Gaseosa Coca Cola 2lts ---------------- S/13.00")
+            print("10. Finalizar pedido")
+            print("11. Salir")
 
             opcion = input("\nSeleccione la opción: ").strip()
 
             #Le colocamos los precios
             precio = 0
 
-            if opcion == "1": precio = 18.00
-            elif opcion == "2": precio = 20.00
-            elif opcion == "3": precio = 35.00
-            elif opcion == "4": precio = 65.00
-            elif opcion == "5": precio = 75.00
-            elif opcion == "6": precio = 4.00
-            elif opcion == "7": precio = 8.00
-            elif opcion == "8": precio = 13.00
+            if opcion == "1":
+                precio = 18.00
+                self.cant_pollos_actual += 0.25
+                self.cant_papas_actual += 0.25
+                self.cant_ensaladas_actual += 0.25
+            elif opcion == "2":
+                precio = 20.00
+                self.cant_pollos_actual += 0.25
+                self.cant_papas_actual += 0.25
+                self.cant_ensaladas_actual += 0.25
+            elif opcion == "3":
+                precio = 35.00
+                self.cant_pollos_actual += 0.50
+                self.cant_papas_actual += 0.50
+                self.cant_ensaladas_actual += 0.50
+            elif opcion == "4":
+                precio = 65.00
+                self.cant_pollos_actual += 1.00
+                self.cant_papas_actual += 1.00
+                self.cant_ensaladas_actual += 1.00
+            elif opcion == "5":
+                precio = 75.00
+                self.cant_pollos_actual += 1.00
+                self.cant_papas_actual += 1.00
+                self.cant_arroz_chaufa_actual += 1.00
+            elif opcion == "6":
+                precio = 4.50
+                nombre_gaseosa = "inka_500ml"
+                self.cant_gaseosas_actual[nombre_gaseosa] = (
+                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
+                )
+            elif opcion == "7":
+                precio = 4.50
+                nombre_gaseosa = "coca_500ml"
+                self.cant_gaseosas_actual[nombre_gaseosa] = (
+                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
+                )
+            elif opcion == "8":
+                precio = 13.00
+                nombre_gaseosa = "inka_2lts"
+                self.cant_gaseosas_actual[nombre_gaseosa] = (
+                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
+                )
             elif opcion == "9":
+                precio = 13.00
+                nombre_gaseosa = "coca_2lts"
+                self.cant_gaseosas_actual[nombre_gaseosa] = (
+                    self.cant_gaseosas_actual.get(nombre_gaseosa, 0) + 1
+                )
+            elif opcion == "10":
                 if self.monto_total == 0:
                     print("No seleccionaste ninguna opción. Vuelve a intentarlo")
                 else:
                     print(f"\nEl total a pagar es: S/{self.monto_total:.2f}")
                     return True
-            elif opcion == "10":
+            elif opcion == "11":
                 print("Se cierra la orden")
                 return False
             else:
@@ -167,7 +251,6 @@ class Sistema_Caja:
 
         #Creamos el pedido
         pedido_actual = Pedido(self.id_pedido, self.monto_total, entrega_actual)
-        self.id_pedido += 1
 
         if cliente_actual.dni:
             print(f"Pedido N°{pedido_actual.id_pedido} registrado a nombre de {cliente_actual.nombre} con DNI {cliente_actual.dni}.")
@@ -177,7 +260,7 @@ class Sistema_Caja:
             print(f"Pedido N°{pedido_actual.id_pedido} registrado a nombre de {cliente_actual.nombre}.")
 
         #Registramos el pago del pedido
-        print("\n----------PAGO----------")
+        print("\n-------------------PAGO-------------------")
         print(f"Modalidad: {pedido_actual.entrega.tipo}")
         print(f"El monto total a cobrar es: S/.{self.monto_total:.2f}")
 
@@ -190,6 +273,46 @@ class Sistema_Caja:
                     print(f"El vuelto a entregar es de: S/.{vuelto:.2f}")
 
                     pago_actual = Metodo_Pago(monto_cobrado, "Completado")
+
+                    #Creamos la impresión del comprobante
+                    print("\n-----------COMPROBANTE DE PAGO------------")
+                    print(f"Pedido N°{pedido_actual.id_pedido}")
+                    print("Fecha de emisión: 11/09/2026")
+                    print(f"Cliente: {cliente_actual.nombre}")
+                    print(f"Tipo de entrega: {pedido_actual.entrega.tipo}")
+
+                    # Si es en salón, muestra la mesa; si es delivery, muestra la dirección
+                    if isinstance(pedido_actual.entrega, Salon):
+                        print(f" N° de Mesa   : {pedido_actual.entrega.num_mesa}")
+                    elif isinstance(pedido_actual.entrega, Delivery):
+                        print(f" Dirección    : {pedido_actual.entrega.direccion}")
+                        print(f" Celular      : {pedido_actual.entrega.celular}")
+
+                        print("-" * 42)
+                        print(f" Cliente      : {cliente_actual.nombre}")
+                    if cliente_actual.dni:
+                        print(f" DNI          : {cliente_actual.dni}")
+                    elif cliente_actual.ruc:
+                        print(f" RUC          : {cliente_actual.ruc}")
+
+                    print("-" * 42)
+                    print(f" IGV (18%)    : S/. {(self.monto_total - (self.monto_total / 1.18)):.2f}")
+                    print(f" Monto Total  : S/. {self.monto_total:.2f}")
+                    print(f" Efectivo     : S/. {monto_cobrado:.2f}")
+                    print(f" Vuelto       : S/. {vuelto:.2f}")
+                    print("=" * 42)
+                    print("         ¡GRACIAS POR SU PREFERENCIA!")
+                    print("=" * 42 + "\n")
+
+                    #Descontamos el stock de lo que hemos vendido
+                    self.almacen.descontar_stock(
+                        self.cant_pollos_actual,
+                        self.cant_papas_actual,
+                        self.cant_ensaladas_actual,
+                        self.cant_arroz_chaufa_actual,
+                        self.cant_gaseosas_actual
+                    )
+
                     self.id_pedido += 1     #Aumentamos el ID si se llegó a cobrar con éxito
                     break
                 
