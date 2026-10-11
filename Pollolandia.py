@@ -304,6 +304,10 @@ class Sistema_Caja:
                 print(f"+ Subtotal actual: S/ {self.monto_total:.2f}")
 
     def comprobante(self):
+        #Creamos las variables para el comprobante
+        monto_comida = self.monto_total
+        costo_envio = 0.0
+
         #Tipo de entrega
         while True:
             print("\n-----------TIPO DE ENTREGA----------")
@@ -316,13 +320,17 @@ class Sistema_Caja:
             if opcion == "1":
                 num_mesa = input("Ingrese el número de mesa: ").strip()
                 entrega_actual = Salon(num_mesa) #Creamos el objeto salon y lo igualamos a la variable
+                monto_a_cobrar = monto_comida  # No hay costo adicional para consumo en salón
                 break
             #Si es delivery
             elif opcion == "2":
                 direccion = input("Ingrese la dirección: ").strip()
                 num_celular = input("Ingrese el número de celular: ").strip()
                 entrega_actual = Delivery(direccion, num_celular)
-                self.monto_total += entrega_actual.costo_envio
+                costo_envio = entrega_actual.costo_envio
+                monto_a_cobrar = (
+                    monto_comida + costo_envio
+                )
                 print("+ Se agregaron S/ 5.00 por el costo del delivery")
                 break
             else:
@@ -355,7 +363,7 @@ class Sistema_Caja:
                 print("\nOpción inválida.")
 
         #Creamos el pedido
-        pedido_actual = Pedido(self.id_pedido, self.monto_total, entrega_actual)
+        pedido_actual = Pedido(self.id_pedido, monto_a_cobrar, entrega_actual)
 
         if cliente_actual.dni:
             print(f"Pedido N°{pedido_actual.id_pedido} registrado a nombre de {cliente_actual.nombre} con DNI {cliente_actual.dni}.")
@@ -401,10 +409,21 @@ class Sistema_Caja:
                         print(f" RUC          : {cliente_actual.ruc}")
 
                     print("-" * 42)
-                    print(f" IGV (18%)    : S/. {(self.monto_total - (self.monto_total / 1.18)):.2f}")
-                    print(f" Monto Total  : S/. {self.monto_total:.2f}")
-                    print(f" Efectivo     : S/. {monto_cobrado:.2f}")
-                    print(f" Vuelto       : S/. {vuelto:.2f}")
+
+                    
+                    igv_comida = monto_comida - (monto_comida / 1.18)
+                    print(f" IGV (18%)    : S/. {igv_comida:.2f}")
+
+                    # Si es delivery, podemos mostrar el costo de envío desglosado opcionalmente
+                    if costo_envio > 0:
+                        print(
+                            f" Subtotal Comida: S/. {monto_comida - igv_comida:.2f}"
+                        )  # Opcional
+                        print(f" Costo Delivery : S/. {costo_envio:.2f}")
+
+                    print(f" Monto Total    : S/. {monto_a_cobrar:.2f}")
+                    print(f" Efectivo       : S/. {monto_cobrado:.2f}")
+                    print(f" Vuelto         : S/. {vuelto:.2f}")
                     print("=" * 42)
                     print("         ¡GRACIAS POR SU PREFERENCIA!")
                     print("=" * 42 + "\n")
